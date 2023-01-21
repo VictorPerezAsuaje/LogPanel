@@ -1,0 +1,32 @@
+#logs p.collapse[aria-expanded="false"] {
+    display: block;
+    min-height: 40px !important;
+    height: 40px;
+    overflow: hidden;
+}
+
+#logs p.collapse.show[aria-expanded="false"] {
+    display: block;
+    height: 100% !important;
+    overflow: hidden;
+}
+
+#logs button.collapsed:after {
+    content: '+ Show Full Stacktrace';
+}
+
+#logs button:not(.collapsed):after {
+    content: '- Hide Stacktrace';
+}
+
+#refreshDataNotification {
+    height: 0px;
+    padding: 0rem;
+    transition: .2s ease-in-out;
+}
+
+    #refreshDataNotification.active {
+        height: fit-content;
+        padding: 1rem;
+        transition: .2s ease-in-out;
+    }

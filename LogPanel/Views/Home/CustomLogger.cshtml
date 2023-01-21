@@ -1,0 +1,107 @@
+﻿@using LogPanelEntities.Entities;
+@model List<Log>
+@inject IClientLogDbConfig config
+
+@{
+    ViewData["Title"] = "Custom Logger";
+    List<BaseClient> clients = config.GetAllClients();
+}
+
+@section Styles{
+    <link rel="stylesheet" href="~/_content/LogPanelViews/css/exceptions.css" />
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="d-flex">
+    <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-white w-25 p-3">
+        <div class="d-flex align-items-center flex-shrink-0 py-4 link-dark text-decoration-none border-bottom justify-content-between">
+            <span class="fs-5 fw-semibold">Clientes</span>
+            <button class="btn btn-outline-primary btn-sm" type="button" onclick="PollLogs()">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+        </div>
+        <div class="list-group list-group-flush border-bottom scrollarea">
+            @for (int i = 0; i < clients?.Count; i++)
+            {
+                <button type="button" class="list-group-item list-group-item-action @(i == 0 ? "active" : "" ) py-3 lh-tight client-item mb-4" aria-current="true" data-clientName="@clients[i].Name" onclick="ChangeActiveClient(this)">
+                    <div class="d-flex w-100 align-items-center justify-content-between">
+                        <strong class="mb-1">@clients[i].Name</strong>
+                    </div>
+                    <div class="col-10 mb-1 small">
+                        @if(clients[i] is CustomClient)
+                        {
+                            <p>Descripción cliente custom: @((clients[i] as CustomClient).CustomDescription)</p>
+                        }
+                        <p>Versión cliente estandar: @clients[i].Description</p>
+                    </div>
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="w-75 p-3">
+        <div id="logs">
+            @for (int i = 0; i < Model?.Count; i++)
+            {
+                <div class="mb-5" data-log="true">
+                    <div class="mb-3">
+                        <p class="text-end small">@Html.DisplayFor(x => Model[i].LogTypeIcon) · @Model[i].Time</p>
+
+                        <p class="fw-bold">@Model[i].Message</p>
+                    </div>
+
+                    <p class="collapse" id="collapse-@i" aria-expanded="false">@Model[i].StackTrace</p>
+                    <button class="btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@i" aria-expanded="false">
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+
+const ChangeActiveClient = (clickedClient) => {
+    const clients = document.querySelectorAll(".client-item");
+    [...clients].forEach(c => c.classList.remove("active"));
+    clickedClient.classList.add("active");
+    PollLogs(clickedClient);
+}
+
+const LogItem = (item) => {
+        return `<div class="mb-5" data-log="true">
+                        <div class="mb-3">
+                            <p class="text-end small">${item.logTypeIcon} · ${item.time}</p>
+
+                                <p class="fw-bold">${item.message}</p>
+                        </div>
+
+                                    <p class="collapse" id="collapse-${item.id}" aria-expanded="false">${item.stackTrace}</p>
+                            <button class="btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${item.id}" aria-expanded="false">
+                        </button>
+                    </div>`;
+}
+
+const PollLogs = (clickedClient = null) => {
+    let activeClient = clickedClient;
+
+    if (clickedClient == null)
+        activeClient = document.querySelector(".client-item.active");
+
+    fetch("/Logs/PollClientLogs?" + new URLSearchParams({
+        clientSelected: activeClient.getAttribute("data-clientName")
+    }))
+    .then((response) => {
+        return response.text();
+    })
+    .then((result) => {
+        const logs = document.getElementById("logs");
+        let logMessages = "";
+        const data = JSON.parse(result);
+        [...data].forEach(d => logMessages += LogItem(d))
+        logs.innerHTML = logMessages;
+    });
+}
+</script>
