@@ -1,0 +1,32 @@
+﻿@using LogPanelEntities.Entities;
+@model List<Log>
+@inject IClientLogDbConfig config
+
+@{
+    List<BaseClient> clients = config.GetAllClients();
+}
+
+<div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-white w-25 p-3">
+    <div class="d-flex align-items-center flex-shrink-0 py-4 link-dark text-decoration-none border-bottom justify-content-between">
+        <span class="fs-5 fw-semibold">Clientes</span>
+        <button class="btn btn-outline-primary btn-sm" type="button" onclick="PollLogs()">
+            <i class="bi bi-arrow-clockwise"></i>
+        </button>
+    </div>
+    <div class="list-group list-group-flush border-bottom scrollarea">
+        @for (int i = 0; i < clients?.Count; i++)
+        {
+            <button type="button" class="list-group-item list-group-item-action @(i == 0 ? "active" : "" ) py-3 lh-tight client-item mb-4" aria-current="true" data-clientName="@clients[i].Name" onclick="ChangeActiveClient(this)">
+                <div class="d-flex w-100 align-items-center justify-content-between">
+                    <strong class="mb-1">@clients[i].Name</strong>
+                    <span id="nMensajesNuevos-@i" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" data-nMensajesAntes="0" data-nMensajesAhora="" data-primeraCarga="true">
+
+                    </span>
+                </div>
+                <div class="col-10 mb-1 small">
+                    Versión cliente: @clients[i].Description
+                </div>
+            </button>
+        }
+    </div>
+</div>

@@ -1,0 +1,18 @@
+﻿@using LogPanelEntities.Entities;
+@model List<Log>
+
+<div class="d-flex">
+    <partial name="/Areas/Log/Views/Shared/_ClientLogSidebar.cshtml" model="@Model" />
+
+    <div class="w-75 p-3">
+        <div id="refreshDataNotification" class="my-5 bg-primary text-white text-center opacity-50">
+            <div class="d-flex justify-content-center align-items-center">
+                <div class="spinner-border text-light me-5" role="status"></div>
+                <b>REFRESHING DATA...</b>
+            </div>
+        </div>
+        <div id="logs">
+            <partial name="/Areas/Log/Views/Shared/_ListadoLogs.cshtml" model="@Model" />
+        </div>
+    </div>
+</div>
